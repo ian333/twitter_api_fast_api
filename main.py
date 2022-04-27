@@ -190,7 +190,30 @@ def home():
     tags=["Tweet"]
 )
 def post():
-    pass
+        """Signup
+    This Path operation register an user in the app
+
+    Parameters : 
+        - Request Body parameter
+        - user : UserRegister
+    
+    returns a json with the basic information
+        -user_id : UUID
+        - email: Emailstr
+        - first_name: str
+        - last_name: str
+        - birth_date
+
+    """    
+    with open("users.json","r+",encoding="UTF-8")  as f:
+        results=json.loads(f.read())
+        user_dict= user.dict()
+        user_dict["user_id"] = str(user_dict["user_id"])
+        user_dict["birth_date"]=str(user_dict["birth_date"])
+        results.append(user_dict)
+        f.seek(0)
+        f.write(json.dumps(results))
+        return user
 
 ###Show a Tweet
 
