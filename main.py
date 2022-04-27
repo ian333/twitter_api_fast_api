@@ -12,11 +12,11 @@ from fastapi import FastAPI,status
 app=FastAPI()
 
 #Models
+
 class Userbase(BaseModel):
     user_id:UUID = Field(...) 
     email:EmailStr = Field(...)
-    
-    
+        
 class UserLogin(Userbase):
     password:str=Field(
             ...,
@@ -24,6 +24,7 @@ class UserLogin(Userbase):
             max_lenght=64
 
         )
+
 class User(Userbase):
     first_name: str=Field(
         ...,
@@ -37,8 +38,10 @@ class User(Userbase):
         example="Vaz"
     )
     birth_date:Optional[date] =Field(default=None)
-    
-    
+        
+class UserRegister(UserLogin,User):
+    pass
+
 class Tweet(BaseModel):
     tweet_id: UUID = Field(...)
     content:str= Field(
@@ -53,7 +56,8 @@ class Tweet(BaseModel):
 # Path Operations
 
 ## Users
-###REgister User
+###Register User
+
 @app.post(
     path="/signup",
     response_model=User,
@@ -62,8 +66,26 @@ class Tweet(BaseModel):
     tags=["Users"]
 )
 def signUp():
+    """Signup
+    This Path operation register an user in the app
+
+    Parameters : 
+        - Request Body parameter
+        - user : UserRegister
+    
+    returns a json with the basic information
+        -user_id : UUID
+        - email: Emailstr
+        - first_name: str
+        - last_name: str
+        - birth_date
+
+    """    
+    
     pass
+
 ###Login User
+
 @app.post(
     path="/login",
     response_model=User,
