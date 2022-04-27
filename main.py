@@ -1,5 +1,5 @@
 #Python
-from datetime import date
+from datetime import date, datetime
 from typing import Optional
 from uuid import UUID
 
@@ -20,7 +20,9 @@ class Userbase(BaseModel):
 class UserLogin(Userbase):
     password:str=Field(
             ...,
-            min_lenght=8
+            min_lenght=8,
+            max_lenght=64
+
         )
 class User(Userbase):
     first_name: str=Field(
@@ -38,7 +40,15 @@ class User(Userbase):
     
     
 class Tweet(BaseModel):
-    pass
+    tweet_id: UUID = Field(...)
+    content:str= Field(
+        ...,
+        min_length=1,
+        max_length=256)
+    created_at:datetime= Field(default=datetime.now())
+    update_at: Optional[datetime] = Field(default=None)
+    by: User = Field (...)
+
 
 @app.get(path="/")
 def home():
