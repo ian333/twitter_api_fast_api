@@ -105,7 +105,8 @@ def signUp(user: UserRegister= Body(...)):
 )
 def login():
     pass
-###Show all User
+
+###Show all Users
 @app.get(
     path="/users",
     response_model=List[User],
@@ -114,7 +115,25 @@ def login():
     tags=["Users"]
 )
 def show_all_users():
-    pass
+    """Show all User
+        
+        This path operation shows all uers in the app
+        Parameters:
+
+            -
+        returns  a json list with all users in the app with the following Keys
+        -user_id : UUID
+        - email: Emailstr
+        - first_name: str
+        - last_name: str
+        - birth_date
+
+
+    """    
+    with open("users.json","r",encoding="UTF-8") as f:
+        results= json.loads(f.read())
+        return results
+
 ###Show a single User
 @app.get(
     path="/users/{user_id}",
