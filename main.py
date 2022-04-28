@@ -189,8 +189,9 @@ def home():
     summary="Post a Tweet",
     tags=["Tweet"]
 )
-def post():
-    """Signup
+def post(tweet : Tweet ):
+    """
+    Post
     This Path operation register an user in the app
 
     Parameters : 
@@ -204,16 +205,16 @@ def post():
         - last_name: str
         - birth_date
 
-    """    
-    with open("users.json","r+",encoding="UTF-8")  as f:
+    """        
+    with open("tweets.json","r+",encoding="UTF-8")  as f:
         results=json.loads(f.read())
-        user_dict= user.dict()
-        user_dict["user_id"] = str(user_dict["user_id"])
-        user_dict["birth_date"]=str(user_dict["birth_date"])
-        results.append(user_dict)
+        tweet_dict= tweet.dict()
+        tweet_dict["tweet_id"] = str(tweet_dict["tweet_id"])
+        tweet_dict["birth_date"]=str(tweet_dict["birth_date"])
+        results.append(tweet_dict)
         f.seek(0)
         f.write(json.dumps(results))
-        return user
+        return tweet
 
 ###Show a Tweet
 
