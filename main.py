@@ -190,7 +190,7 @@ def home():
     tags=["Tweet"]
 )
 def post():
-        """Signup
+    """Signup
     This Path operation register an user in the app
 
     Parameters : 
