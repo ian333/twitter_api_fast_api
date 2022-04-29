@@ -1,13 +1,19 @@
 #Python
+from dataclasses import field
+from fileinput import filename
 import json
 from datetime import date, datetime
 from typing import Optional,List
-from uuid import UUID
+from uuid import UUID,uuid4
 
 #Pydantic
 from pydantic import BaseModel, EmailStr, Field
 #Fastapi 
-from fastapi import Body, FastAPI,status
+from fastapi import Body, FastAPI, File, UploadFile,status
+from fastapi.responses import FileResponse
+
+#Pandas
+import pandas as pd
 
 
 app=FastAPI()
@@ -15,7 +21,7 @@ app=FastAPI()
 #Models
 
 class Userbase(BaseModel):
-    user_id:UUID = Field(...) 
+    user_id:UUID = Field(...,example=uuid4()) 
     email:EmailStr = Field(...)
         
 class UserLogin(Userbase):
@@ -44,7 +50,7 @@ class UserRegister(UserLogin,User):
     pass
 
 class Tweet(BaseModel):
-    tweet_id: UUID = Field(...)
+    tweet_id:UUID = Field(...)
     content:str= Field(
         ...,
         min_length=1,
@@ -66,7 +72,7 @@ class Tweet(BaseModel):
     summary="Register a User",
     tags=["Users"]
 )
-def signUp(user: UserRegister= Body(...)):
+def signUp(user: UserRegister= Body(...,)):
     """Signup
     This Path operation register an user in the app
 
@@ -178,7 +184,25 @@ def update_a_user():
     tags=["Tweet"]
     )
 def home():
-    return {"Twitter API ":"Working"}
+    """
+    Post
+    This Path operation register an user in the app
+
+    Parameters : 
+        - Request Body parameter
+        - tweet : Tweet
+    
+    returns a json with the basic information
+        -    tweet_id: UUID 
+        -    content:str
+        -    created_at:datetime
+        -    update_at: Optional[datetime]
+        -    by: User 
+    """        
+    with open("tweets.json","r+",encoding="UTF-8")  as f:
+        results=json.loads(f.read())
+        return results
+    #return {"Twitter API ":"Working"}
 
 ###Post a Tweet
 
@@ -189,28 +213,30 @@ def home():
     summary="Post a Tweet",
     tags=["Tweet"]
 )
-def post(tweet : Tweet ):
+def post(tweet : Tweet = Body(...)):
     """
     Post
     This Path operation register an user in the app
 
     Parameters : 
         - Request Body parameter
-        - user : UserRegister
+        - tweet : Tweet
     
     returns a json with the basic information
-        -user_id : UUID
-        - email: Emailstr
-        - first_name: str
-        - last_name: str
-        - birth_date
-
+        -    tweet_id: UUID 
+        -    content:str
+        -    created_at:datetime
+        -    update_at: Optional[datetime]
+        -    by: User 
     """        
     with open("tweets.json","r+",encoding="UTF-8")  as f:
         results=json.loads(f.read())
         tweet_dict= tweet.dict()
         tweet_dict["tweet_id"] = str(tweet_dict["tweet_id"])
-        tweet_dict["birth_date"]=str(tweet_dict["birth_date"])
+        tweet_dict["created_at"]=str(tweet_dict["created_at"])
+        tweet_dict["update_at"]=str(tweet_dict["update_at"])
+        tweet_dict["by"]["user_id"]=str(tweet_dict["by"]["user_id"])
+        tweet_dict["by"]["birth_date"]=str(tweet_dict["by"]["birth_date"])
         results.append(tweet_dict)
         f.seek(0)
         f.write(json.dumps(results))
@@ -226,7 +252,8 @@ def post(tweet : Tweet ):
     tags=["Tweet"]
 )
 def show_a_tweet():
-    pass
+    pass    
+
 
 ###Delete a Tweet
 @app.delete(
@@ -251,3 +278,24 @@ def delete_a_tweet():
 def update_a_tweet():
     pass
 
+### Convert File of SAI to CSV with stock 
+
+
+@app.post(
+    path="/convert_javaz",
+    status_code=status.HTTP_200_OK,
+    summary="Convert stock file SAI to CSV",
+    tags=["File"]
+)
+
+def convert_file_to_csv(stock : UploadFile = File(...)):
+    content=stock.file.read()
+    df=pd.read_excel(content)
+    df=df.dropna(axis=1,thresh=100)
+    df=df.dropna(axis=0,thresh=3)
+    df=df.dropna(axis=1,thresh=100)
+    df=df.iloc[:,0:]
+    df.columns =['Clave','Descripción','Existencia',"Unidad"]
+    df.to_csv("stock.csv")
+    return FileResponse(path="stock.csv",filename="stock.csv")
+    
